@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5fff5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #28a745;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: box-shadow 0.3s ease-in-out;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        #output {
+            margin-top: 10px;
+            padding: 15px;
+            background-color: #f0f9f0;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+        }
+
+        #output h2 {
+            font-size: 20px;
+            margin-top: 0;
+            margin-bottom: 10px;
+        }
+
+        #output textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: none;
+            box-sizing: border-box;
+            background-color: #fff;
+        }
+
+        .guidelines {
+            margin-top: 20px;
+            background-color: #e8fbe8;
+            padding: 10px;
+            border-left: 4px solid #28a745;
+            border-radius: 4px;
+        }
+
+        .guidelines p {
+            font-size: 12px;
+            line-height: 1.4;
+            margin: 5px 0;
+        }
+
+        .guidelines a {
+            color: #28a745;
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            label, input, button {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Link Generator</h1>
+        <form id="linkForm">
+            <label for="showName">Show Name:</label>
+            <input type="text" id="showName" placeholder="e.g., Bleach">
+
+            <label for="season">Season (e.g., 1 or S1):</label>
+            <input type="text" id="season" placeholder="e.g., 1">
+
+            <label for="episodeRange">Episode Range (e.g., 1-20):</label>
+            <input type="text" id="episodeRange" placeholder="e.g., 1-20">
+
+            <label for="quality">Quality:</label>
+            <input type="text" id="quality" placeholder="e.g., 720p">
+
+            <label for="audio">Audio:</label>
+            <input type="text" id="audio" placeholder="e.g., Dual">
+
+            <label for="startLink">Start Link:</label>
+            <input type="text" id="startLink" placeholder="e.g., https://t.me/c/12345/10">
+
+            <label for="customFormat">Custom Format:</label>
+            <textarea id="customFormat" placeholder="{ShowName} [{Season} {Episode}] {Quality} [{Audio}] @{Ani_Weebs}"></textarea>
+
+            <button type="button" onclick="generateLinks()">Generate Links</button>
+        </form>
+
+        <div id="output">
+            <h2>Generated Links</h2>
+            <textarea id="generatedLinks" readonly>No links generated yet.</textarea>
+            <button onclick="copyToClipboard()">Copy to Clipboard</button>
+        </div>
+
+        <div class="guidelines">
+            <p>Follow these steps:</p>
+            <p>1. Fill in all fields with accurate details.</p>
+            <p>2. Edit "Custom Format" for desired output.</p>
+            <p>3. Replace @Ani_Weebs if necessary.</p>
+            <p>Made with love by <a href="https://t.me/Rai_Yan_00">@Rai_Yan_00</a>.</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedFormat = localStorage.getItem('customFormat');
+            if (savedFormat) {
+                document.getElementById('customFormat').value = savedFormat;
+            }
+        });
+
+        function formatSeason(season) {
+            return season.startsWith('S') ? season : `S${season}`;
+        }
+
+        function formatEpisode(episode) {
+            return episode.startsWith('EP') ? episode : `EP${episode}`;
+        }
+
+        function generateLinks() {
+            const showName = document.getElementById('showName').value.trim() || '{ShowName}';
+            let season = document.getElementById('season').value.trim() || '{Season}';
+            const episodeRange = document.getElementById('episodeRange').value.trim();
+            const quality = document.getElementById('quality').value.trim() || '{Quality}';
+            const audio = document.getElementById('audio').value.trim() || '{Audio}';
+            const startLink = document.getElementById('startLink').value.trim() || 'https://t.me/c/12345/10';
+            const customFormat = document.getElementById('customFormat').value;
+
+            localStorage.setItem('customFormat', customFormat);
+
+            const [startEpisode, endEpisode] = episodeRange.split('-').map(e => parseInt(e.trim(), 10));
+
+            if (isNaN(startEpisode) || isNaN(endEpisode)) {
+                alert('Invalid episode range. Enter valid numbers for Start and End Episodes.');
+                return;
+            }
+
+            const [channelSegment, channelID, linkID] = startLink.split('/').slice(-3);
+            const initialLinkID = parseInt(linkID, 10);
+
+            if (isNaN(channelID) || isNaN(initialLinkID)) {
+                alert('Invalid start link. Ensure the link is in the format: https://t.me/c/12345/10');
+                return;
+            }
+
+            season = formatSeason(season);
+
+            let output = '';
+            let currentLinkID = initialLinkID;
+
+            for (let episodeNum = startEpisode; episodeNum <= endEpisode; episodeNum++) {
+                const episode = formatEpisode(episodeNum.toString().padStart(2, '0'));
+                const link = `https://t.me/c/${channelID}/${currentLinkID} -n ${showName} [${season} ${episode}] ${quality} [${audio}] @Ani_Weebs.mkv`;
+                output += link + '\n';
+                currentLinkID++;
+            }
+
+            document.getElementById('generatedLinks').value = output.trim();
+        }
+
+        function copyToClipboard() {
+            const links = document.getElementById('generatedLinks');
+            links.select();
+            document.execCommand('copy');
+            alert('Links copied to clipboard!');
+        }
+    </script>
+</body>
+</html>
