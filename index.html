@@ -111,6 +111,23 @@
             text-decoration: none;
         }
 
+        /* Error pop-up styling */
+        .error-popup {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #ffcccc;
+            color: #990000;
+            border: 1px solid #990000;
+            border-radius: 4px;
+            padding: 10px 20px;
+            font-size: 14px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            display: none;
+        }
+
         @media (max-width: 600px) {
             .container {
                 margin: 10px;
@@ -128,6 +145,8 @@
     </style>
 </head>
 <body>
+    <div class="error-popup" id="errorPopup"></div>
+
     <div class="container">
         <h1>Link Generator</h1>
         <form id="linkForm">
@@ -149,8 +168,11 @@
             <label for="startLink">Start Link:</label>
             <input type="text" id="startLink" placeholder="e.g., https://t.me/c/12345/10">
 
+            <label for="channelUsername">Channel Username:</label>
+            <input type="text" id="channelUsername" placeholder="Ani_Weebs" value="Ani_Weebs">
+
             <label for="customFormat">Custom Format:</label>
-            <textarea id="customFormat" placeholder="{ShowName} [{Season} {Episode}] {Quality} [{Audio}] @{Ani_Weebs}"></textarea>
+            <textarea id="customFormat" placeholder="{ShowName} [{Season} {Episode}] {Quality} [{Audio}] @{ChannelUsername}.mkv"></textarea>
 
             <button type="button" onclick="generateLinks()">Generate Links</button>
         </form>
@@ -170,69 +192,108 @@
         </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedFormat = localStorage.getItem('customFormat');
-            if (savedFormat) {
-                document.getElementById('customFormat').value = savedFormat;
-            }
-        });
+   <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Load saved values from local storage
+        const savedFormat = localStorage.getItem('customFormat');
+        const savedUsername = localStorage.getItem('channelUsername');
+        const savedShowName = localStorage.getItem('showName');
+        const savedSeason = localStorage.getItem('season');
+        const savedAudio = localStorage.getItem('audio');
 
-        function formatSeason(season) {
-            return season.startsWith('S') ? season : `S${season}`;
+        if (savedFormat) document.getElementById('customFormat').value = savedFormat;
+        if (savedUsername) document.getElementById('channelUsername').value = savedUsername;
+        if (savedShowName) document.getElementById('showName').value = savedShowName;
+        if (savedSeason) document.getElementById('season').value = savedSeason;
+        if (savedAudio) document.getElementById('audio').value = savedAudio;
+    });
+
+    function showError(message) {
+        const errorPopup = document.getElementById('errorPopup');
+        errorPopup.textContent = message;
+        errorPopup.style.display = 'block';
+        setTimeout(() => {
+            errorPopup.style.display = 'none';
+        }, 3000);
+    }
+
+    function formatSeason(season) {
+        return season.startsWith('S') ? season : `S${season}`;
+    }
+
+    function formatEpisode(episode) {
+        return episode.startsWith('EP') ? episode : `EP${episode}`;
+    }
+
+    function generateLinks() {
+        // Gather inputs
+        const showName = document.getElementById('showName').value.trim() || 'Bleach';
+        let season = document.getElementById('season').value.trim() || '1';
+        const episodeRange = document.getElementById('episodeRange').value.trim();
+        const quality = document.getElementById('quality').value.trim() || '720p';
+        const audio = document.getElementById('audio').value.trim() || 'Dual';
+        const startLink = document.getElementById('startLink').value.trim();
+        const channelUsernameInput = document.getElementById('channelUsername').value.trim();
+        const channelUsername = channelUsernameInput || 'Ani_Weebs';
+        const customFormat = document.getElementById('customFormat').value.trim() || document.getElementById('customFormat').placeholder;
+
+        // Save values to local storage
+        localStorage.setItem('customFormat', customFormat);
+        localStorage.setItem('channelUsername', channelUsername);
+        localStorage.setItem('showName', showName);
+        localStorage.setItem('season', season);
+        localStorage.setItem('audio', audio);
+
+        const [startEpisode, endEpisode] = episodeRange.split('-').map(e => parseInt(e.trim(), 10));
+
+        if (isNaN(startEpisode) || isNaN(endEpisode)) {
+            showError('Invalid episode range. Enter valid numbers for Start and End Episodes.');
+            return;
         }
 
-        function formatEpisode(episode) {
-            return episode.startsWith('EP') ? episode : `EP${episode}`;
+        const match = startLink.match(/https:\/\/t\.me\/c\/(\d+)\/(\d+)/);
+        if (!match) {
+            showError('Invalid start link. Ensure the link matches "https://t.me/c/12345/10".');
+            return;
         }
 
-        function generateLinks() {
-            const showName = document.getElementById('showName').value.trim() || '{ShowName}';
-            let season = document.getElementById('season').value.trim() || '{Season}';
-            const episodeRange = document.getElementById('episodeRange').value.trim();
-            const quality = document.getElementById('quality').value.trim() || '{Quality}';
-            const audio = document.getElementById('audio').value.trim() || '{Audio}';
-            const startLink = document.getElementById('startLink').value.trim() || 'https://t.me/c/12345/10';
-            const customFormat = document.getElementById('customFormat').value;
+        const channelID = match[1];
+        const initialLinkID = parseInt(match[2], 10);
 
-            localStorage.setItem('customFormat', customFormat);
-
-            const [startEpisode, endEpisode] = episodeRange.split('-').map(e => parseInt(e.trim(), 10));
-
-            if (isNaN(startEpisode) || isNaN(endEpisode)) {
-                alert('Invalid episode range. Enter valid numbers for Start and End Episodes.');
-                return;
-            }
-
-            const [channelSegment, channelID, linkID] = startLink.split('/').slice(-3);
-            const initialLinkID = parseInt(linkID, 10);
-
-            if (isNaN(channelID) || isNaN(initialLinkID)) {
-                alert('Invalid start link. Ensure the link is in the format: https://t.me/c/12345/10');
-                return;
-            }
-
-            season = formatSeason(season);
-
-            let output = '';
-            let currentLinkID = initialLinkID;
-
-            for (let episodeNum = startEpisode; episodeNum <= endEpisode; episodeNum++) {
-                const episode = formatEpisode(episodeNum.toString().padStart(2, '0'));
-                const link = `https://t.me/c/${channelID}/${currentLinkID} -n ${showName} [${season} ${episode}] ${quality} [${audio}] @Ani_Weebs.mkv`;
-                output += link + '\n';
-                currentLinkID++;
-            }
-
-            document.getElementById('generatedLinks').value = output.trim();
+        if (isNaN(initialLinkID)) {
+            showError('Invalid start link. Check the message ID.');
+            return;
         }
 
-        function copyToClipboard() {
-            const links = document.getElementById('generatedLinks');
-            links.select();
-            document.execCommand('copy');
-            alert('Links copied to clipboard!');
+        season = formatSeason(season);
+
+        let output = '';
+        let currentLinkID = initialLinkID;
+
+        for (let episodeNum = startEpisode; episodeNum <= endEpisode; episodeNum++) {
+            const episode = formatEpisode(episodeNum.toString().padStart(2, '0'));
+            const formattedLink = customFormat
+                .replace('{ShowName}', showName)
+                .replace('{Season}', season)
+                .replace('{Episode}', episode)
+                .replace('{Quality}', quality)
+                .replace('{Audio}', audio)
+                .replace('{ChannelUsername}', `${channelUsername}`)
+                .replace('{ChannelID}', channelID)
+                .replace('{LinkID}', currentLinkID);
+            output += formattedLink + '\n';
+            currentLinkID++;
         }
-    </script>
+
+        document.getElementById('generatedLinks').value = output.trim();
+    }
+
+    function copyToClipboard() {
+        const links = document.getElementById('generatedLinks');
+        links.select();
+        document.execCommand('copy');
+        alert('Links copied to clipboard!');
+    }
+</script>
 </body>
 </html>
