@@ -156,8 +156,8 @@
             <label for="season">Season (e.g., 1 or S1):</label>
             <input type="text" id="season" placeholder="e.g., 1">
 
-            <label for="episodeRange">Episode Range (e.g., 1-20):</label>
-            <input type="text" id="episodeRange" placeholder="e.g., 1-20">
+            <label for="episodeRange">Episode Range (e.g., 1-12):</label>
+            <input type="text" id="episodeRange" placeholder="e.g., 1-12">
 
             <label for="quality">Quality:</label>
             <input type="text" id="quality" placeholder="e.g., 720p">
@@ -169,7 +169,7 @@
             <input type="text" id="startLink" placeholder="e.g., https://t.me/c/12345/10">
 
             <label for="channelUsername">Channel Username:</label>
-            <input type="text" id="channelUsername" placeholder="Ani_Weebs" value="Ani_Weebs">
+            <input type="text" id="channelUsername" placeholder="Ani_Weebs">
 
             <label for="customFormat">Custom Format:</label>
             <textarea id="customFormat" placeholder="{ShowName} [{Season} {Episode}] {Quality} [{Audio}] @{ChannelUsername}.mkv"></textarea>
@@ -191,23 +191,7 @@
             <p>Made with love by <a href="https://t.me/Rai_Yan_00">@Rai_Yan_00</a>.</p>
         </div>
     </div>
-
-   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // Load saved values from local storage
-        const savedFormat = localStorage.getItem('customFormat');
-        const savedUsername = localStorage.getItem('channelUsername');
-        const savedShowName = localStorage.getItem('showName');
-        const savedSeason = localStorage.getItem('season');
-        const savedAudio = localStorage.getItem('audio');
-
-        if (savedFormat) document.getElementById('customFormat').value = savedFormat;
-        if (savedUsername) document.getElementById('channelUsername').value = savedUsername;
-        if (savedShowName) document.getElementById('showName').value = savedShowName;
-        if (savedSeason) document.getElementById('season').value = savedSeason;
-        if (savedAudio) document.getElementById('audio').value = savedAudio;
-    });
-
+<script>
     function showError(message) {
         const errorPopup = document.getElementById('errorPopup');
         errorPopup.textContent = message;
@@ -221,21 +205,19 @@
         return season.startsWith('S') ? season : `S${season}`;
     }
 
-    function formatEpisode(episode) {
-        return episode.startsWith('EP') ? episode : `EP${episode}`;
-    }
-
     function generateLinks() {
         // Gather inputs
-        const showName = document.getElementById('showName').value.trim() || 'Bleach';
-        let season = document.getElementById('season').value.trim() || '1';
+        const showName = document.getElementById('showName').value.trim() || 'Spirit Chronicles';
+        let season = document.getElementById('season').value.trim() || '2';
         const episodeRange = document.getElementById('episodeRange').value.trim();
         const quality = document.getElementById('quality').value.trim() || '720p';
-        const audio = document.getElementById('audio').value.trim() || 'Dual';
+        const audio = document.getElementById('audio').value.trim() || 'Sub';
         const startLink = document.getElementById('startLink').value.trim();
-        const channelUsernameInput = document.getElementById('channelUsername').value.trim();
-        const channelUsername = channelUsernameInput || 'Ani_Weebs';
+        const channelUsername = document.getElementById('channelUsername').value.trim() || 'Ani_Weebs';
         const customFormat = document.getElementById('customFormat').value.trim() || document.getElementById('customFormat').placeholder;
+
+        // Format season
+        season = formatSeason(season);
 
         // Save values to local storage
         localStorage.setItem('customFormat', customFormat);
@@ -258,31 +240,20 @@
         }
 
         const channelID = match[1];
-        const initialLinkID = parseInt(match[2], 10);
-
-        if (isNaN(initialLinkID)) {
-            showError('Invalid start link. Check the message ID.');
-            return;
-        }
-
-        season = formatSeason(season);
+        let messageID = parseInt(match[2], 10);
 
         let output = '';
-        let currentLinkID = initialLinkID;
-
-        for (let episodeNum = startEpisode; episodeNum <= endEpisode; episodeNum++) {
-            const episode = formatEpisode(episodeNum.toString().padStart(2, '0'));
-            const formattedLink = customFormat
+        for (let i = startEpisode; i <= endEpisode; i++) {
+            const episode = `EP${i.toString().padStart(2, '0')}`;
+            const formattedLink = `https://t.me/c/${channelID}/${messageID} -n ${customFormat
                 .replace('{ShowName}', showName)
                 .replace('{Season}', season)
                 .replace('{Episode}', episode)
                 .replace('{Quality}', quality)
                 .replace('{Audio}', audio)
-                .replace('{ChannelUsername}', `${channelUsername}`)
-                .replace('{ChannelID}', channelID)
-                .replace('{LinkID}', currentLinkID);
-            output += formattedLink + '\n';
-            currentLinkID++;
+                .replace('{ChannelUsername}', channelUsername)}`;
+            output += `${formattedLink}\n`;
+            messageID++;
         }
 
         document.getElementById('generatedLinks').value = output.trim();
