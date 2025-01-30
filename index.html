@@ -1,197 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Link Generator</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f5fff5;
-            color: #333;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anime Link Generator</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary-color: #7C3AED;
+      --accent-color: #10B981;
+      --background-color: #F5F3FF;
+      --input-border: #DDD6FE;
+    }
 
-        .container {
-            max-width: 500px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: #ffffff;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-        }
+    body {
+      background: var(--background-color);
+      min-height: 100vh;
+      padding: 1.5rem;
+    }
 
-        h1 {
-            text-align: center;
-            color: #28a745;
-            font-size: 28px;
-            margin-bottom: 20px;
-        }
+    .container-main {
+      max-width: 700px;
+      margin: 0 auto;
+    }
 
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            font-weight: bold;
-        }
+    .form-label {
+      color: #1F2937;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+    }
 
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-            transition: box-shadow 0.3s ease-in-out;
-        }
+    .form-control {
+      border: 2px solid var(--input-border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
 
-        input:focus, textarea:focus {
-            outline: none;
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
-        }
+    .form-control:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+    }
 
-        button {
-            width: 100%;
-            padding: 10px;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+    .input-icon {
+      color: var(--primary-color);
+      margin-right: 0.6rem;
+      font-size: 0.9rem;
+    }
 
-        button:hover {
-            background-color: #218838;
-        }
+    .btn-primary {
+      background: var(--primary-color);
+      border: none;
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+    }
 
-        #output {
-            margin-top: 10px;
-            padding: 15px;
-            background-color: #f0f9f0;
-            border-radius: 4px;
-            border-left: 4px solid #28a745;
-        }
+    .btn-primary:hover {
+      background: #6D28D9;
+      transform: translateY(-1px);
+    }
 
-        #output h2 {
-            font-size: 20px;
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
+    .error-popup {
+      background: #FEE2E2;
+      color: #B91C1C;
+      padding: 0.8rem 1.2rem;
+      border-radius: 6px;
+      position: fixed;
+      top: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      display: none;
+      animation: fadeIn 0.3s ease-out;
+    }
 
-        #output textarea {
-            width: 100%;
-            height: 100px;
-            padding: 10px;
-            font-size: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: none;
-            box-sizing: border-box;
-            background-color: #fff;
-        }
+    @keyframes fadeIn {
+      from { opacity: 0; top: 1rem; }
+      to { opacity: 1; top: 1.5rem; }
+    }
 
-        .guidelines {
-            margin-top: 20px;
-            background-color: #e8fbe8;
-            padding: 10px;
-            border-left: 4px solid #28a745;
-            border-radius: 4px;
-        }
+    .output-area {
+      margin-top: 1.5rem;
+      animation: slideUp 0.4s ease-out;
+    }
 
-        .guidelines p {
-            font-size: 12px;
-            line-height: 1.4;
-            margin: 5px 0;
-        }
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        .guidelines a {
-            color: #28a745;
-            text-decoration: none;
-        }
+    .copy-btn {
+      background: var(--accent-color) !important;
+      border: none;
+      padding: 0.4rem 0.8rem !important;
+      font-size: 0.85rem !important;
+    }
 
-        /* Error pop-up styling */
-        .error-popup {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #ffcccc;
-            color: #990000;
-            border: 1px solid #990000;
-            border-radius: 4px;
-            padding: 10px 20px;
-            font-size: 14px;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            display: none;
-        }
+    .copy-btn:hover {
+      background: #059669 !important;
+    }
 
-        @media (max-width: 600px) {
-            .container {
-                margin: 10px;
-                padding: 15px;
-            }
-
-            h1 {
-                font-size: 22px;
-            }
-
-            label, input, button {
-                font-size: 14px;
-            }
-        }
-    </style>
+    textarea {
+      min-height: 120px;
+      font-size: 0.85rem !important;
+      background: #EDE9FE !important;
+      border-color: #C4B5FD !important;
+    }
+  </style>
 </head>
 <body>
-    <div class="error-popup" id="errorPopup"></div>
+  <div class="error-popup" id="errorPopup"></div>
 
-    <div class="container">
-        <h1>Link Generator</h1>
-        <form id="linkForm">
-            <label for="showName">Show Name:</label>
-            <input type="text" id="showName" placeholder="e.g., Bleach">
+  <div class="container-main">
+    <h3 class="text-center mb-4" style="color: var(--primary-color);">
+      <i class="fas fa-link me-2"></i>Anime Link Generator
+    </h3>
 
-            <label for="season">Season (e.g., 1 or S1):</label>
-            <input type="text" id="season" placeholder="e.g., 1">
-
-            <label for="episodeRange">Episode Range (e.g., 1-12):</label>
-            <input type="text" id="episodeRange" placeholder="e.g., 1-12">
-
-            <label for="quality">Quality:</label>
-            <input type="text" id="quality" placeholder="e.g., 720p">
-
-            <label for="audio">Audio:</label>
-            <input type="text" id="audio" placeholder="e.g., Dual">
-
-            <label for="startLink">Start Link:</label>
-            <input type="text" id="startLink" placeholder="e.g., https://t.me/c/12345/10">
-
-            <label for="channelUsername">Channel Username:</label>
-            <input type="text" id="channelUsername" placeholder="Ani_Weebs">
-
-            <label for="customFormat">Custom Format:</label>
-            <textarea id="customFormat" placeholder="{ShowName} [{Season} {Episode}] {Quality} [{Audio}] @{ChannelUsername}.mkv"></textarea>
-
-            <button type="button" onclick="generateLinks()">Generate Links</button>
-        </form>
-
-        <div id="output">
-            <h2>Generated Links</h2>
-            <textarea id="generatedLinks" readonly>No links generated yet.</textarea>
-            <button onclick="copyToClipboard()">Copy to Clipboard</button>
+    <!-- Input Form -->
+    <form id="linkForm">
+      <div class="row g-3">
+        <!-- Show Name -->
+        <div class="col-12">
+          <label class="form-label"><i class="fas fa-tv input-icon"></i>Show Name</label>
+          <input type="text" id="showName" class="form-control" placeholder="e.g., Bleach">
         </div>
 
-        <div class="guidelines">
-            <p>Follow these steps:</p>
-            <p>1. Fill in all fields with accurate details.</p>
-            <p>2. Edit "Custom Format" for desired output.</p>
-            <p>3. Replace @Ani_Weebs if necessary.</p>
-            <p>Made with love by <a href="https://t.me/Rai_Yan_00">@Rai_Yan_00</a>.</p>
+        <!-- Season & Episodes -->
+        <div class="col-md-6">
+          <label class="form-label"><i class="fas fa-list-ol input-icon"></i>Season</label>
+          <input type="text" id="season" class="form-control" placeholder="S1">
         </div>
+        
+        <div class="col-md-6">
+          <label class="form-label"><i class="fas fa-play-circle input-icon"></i>Episode Range</label>
+          <input type="text" id="episodeRange" class="form-control" placeholder="1-12">
+        </div>
+
+        <!-- Quality & Audio -->
+        <div class="col-md-6">
+          <label class="form-label"><i class="fas fa-video input-icon"></i>Quality</label>
+          <input type="text" id="quality" class="form-control" placeholder="720p">
+        </div>
+        
+        <div class="col-md-6">
+          <label class="form-label"><i class="fas fa-volume-up input-icon"></i>Audio</label>
+          <input type="text" id="audio" class="form-control" placeholder="Dual">
+        </div>
+
+        <!-- Start Link -->
+        <div class="col-12">
+          <label class="form-label"><i class="fas fa-link input-icon"></i>Start Link</label>
+          <input type="url" id="startLink" class="form-control" placeholder="https://t.me/c/12345/10">
+        </div>
+
+        <!-- Channel Username -->
+        <div class="col-12">
+          <label class="form-label"><i class="fas fa-at input-icon"></i>Channel Username</label>
+          <input type="text" id="channelUsername" class="form-control" placeholder="Ani_Weebs">
+        </div>
+
+        <!-- Custom Format -->
+        <div class="col-12">
+          <label class="form-label"><i class="fas fa-code input-icon"></i>Custom Format</label>
+          <textarea id="customFormat" class="form-control" rows="2"
+            placeholder="{ShowName} [{Season} {Episode}] {Quality} [{Audio}] @{ChannelUsername}.mkv"></textarea>
+        </div>
+      </div>
+
+      <button type="button" onclick="generateLinks()" class="btn btn-primary w-100 mt-3">
+        <i class="fas fa-magic me-2"></i>Generate Links
+      </button>
+    </form>
+
+    <!-- Output Section -->
+    <div class="output-area">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h5 class="m-0 fs-6"><i class="fas fa-file-code me-2"></i>Generated Links</h5>
+        <button onclick="copyToClipboard()" class="btn copy-btn text-white">
+          <i class="fas fa-copy me-2"></i>Copy
+        </button>
+      </div>
+      <textarea id="generatedLinks" class="form-control bg-light border" 
+        rows="5" readonly>No links generated yet.</textarea>
     </div>
-<script>
+
+    <!-- Footer -->
+    <div class="text-center mt-3 text-muted small">
+      Crafted with <i class="fas fa-heart text-danger"></i> by 
+      <a href="https://t.me/Rai_Yan_00" class="text-decoration-none">@Rai_Yan_00</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Original JavaScript Preserved -->
+  <script>
     function showError(message) {
         const errorPopup = document.getElementById('errorPopup');
         errorPopup.textContent = message;
@@ -206,7 +214,6 @@
     }
 
     function generateLinks() {
-        // Gather inputs
         const showName = document.getElementById('showName').value.trim() || 'Spirit Chronicles';
         let season = document.getElementById('season').value.trim() || '2';
         const episodeRange = document.getElementById('episodeRange').value.trim();
@@ -216,10 +223,8 @@
         const channelUsername = document.getElementById('channelUsername').value.trim() || 'Ani_Weebs';
         const customFormat = document.getElementById('customFormat').value.trim() || document.getElementById('customFormat').placeholder;
 
-        // Format season
         season = formatSeason(season);
 
-        // Save values to local storage
         localStorage.setItem('customFormat', customFormat);
         localStorage.setItem('channelUsername', channelUsername);
         localStorage.setItem('showName', showName);
@@ -257,6 +262,10 @@
         }
 
         document.getElementById('generatedLinks').value = output.trim();
+        document.querySelector('.output-area').style.animation = 'none';
+        requestAnimationFrame(() => {
+            document.querySelector('.output-area').style.animation = 'slideUp 0.4s ease-out';
+        });
     }
 
     function copyToClipboard() {
@@ -265,6 +274,6 @@
         document.execCommand('copy');
         alert('Links copied to clipboard!');
     }
-</script>
+  </script>
 </body>
 </html>
